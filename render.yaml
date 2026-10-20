@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: to-be-done-verify
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: ADMIN_PWD
+        value: 20010318
+      - key: BLOB_READ_WRITE_TOKEN
+        sync: false

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To be done 验证码后台</title>
+<style>
+  :root{
+    --bg:#f5f5f7; --card:#fff; --border:#e2e2e6; --text:#1d1d1f; --muted:#86868b;
+    --accent:#0a84ff; --green:#34c759; --red:#ff3b30; --amber:#ff9500;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding:16px}
+  h1{font-size:20px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block}
+  .card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:16px}
+  .card h2{font-size:15px;margin-bottom:12px;font-weight:600}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  input[type=text],input[type=number]{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;width:100%;min-width:120px}
+  button{padding:8px 16px;border:0;border-radius:8px;font-size:14px;cursor:pointer;font-weight:500;background:var(--accent);color:#fff}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  button.danger{background:var(--red)}
+  button.small{padding:4px 10px;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:500;white-space:nowrap}
+  td{padding:8px 6px;border-bottom:1px solid #f0f0f2;white-space:nowrap}
+  .code{font-family:ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.5px}
+  .badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .b-unused{background:#e8f0fe;color:#1a73e8}
+  .b-active{background:#e6f4ea;color:#137333}
+  .b-revoked{background:#fce8e6;color:#c5221f}
+  .tabs{display:flex;gap:4px;margin-bottom:12px}
+  .tabs button{background:transparent;color:var(--muted);border:0}
+  .tabs button.active{background:var(--accent);color:#fff}
+  .empty{color:var(--muted);text-align:center;padding:24px;font-size:13px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+  .toast.show{opacity:1}
+  .stat{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:var(--bg);font-size:13px;margin-right:8px}
+  .stat b{font-size:18px}
+</style>
+</head>
+<body>
+  <div id="login" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999">
+    <div style="background:var(--card);border-radius:16px;padding:32px 28px;width:320px;text-align:center;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.06)">
+      <div style="font-size:36px;margin-bottom:8px">🔐</div>
+      <h1 style="font-size:18px;margin-bottom:4px">验证码后台</h1>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">请输入管理密码</p>
+      <input type="password" id="pwdInput" placeholder="密码" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;text-align:center;margin-bottom:12px;outline:none" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()" style="width:100%;padding:12px;font-size:15px;font-weight:600">进入</button>
+      <div id="loginErr" style="margin-top:10px;font-size:13px;color:var(--red);min-height:18px"></div>
+    </div>
+  </div>
+  <div id="main" style="display:none">
+  <h1><span class="dot"></span> To be done 验证码后台 <span style="font-size:13px;color:var(--muted);font-weight:400">— 一机一码 · 你手动发码</span></h1>
+  <div class="card">
+    <h2>生成验证码</h2>
+    <div class="row">
+      <input type="number" id="cnt" value="1" min="1" max="50" style="width:80px" title="数量">
+      <input type="text" id="note" placeholder="备注：发给谁的（如：小王-小米12）" style="flex:1;min-width:200px">
+      <button onclick="gen()">生成</button>
+    </div>
+    <div id="genOut" style="margin-top:12px"></div>
+  </div>
+  <div class="card" style="padding:12px 16px">
+    <span class="stat">总码数 <b id="sTotal">0</b></span>
+    <span class="stat" style="color:var(--accent)">未使用 <b id="sUnused">0</b></span>
+    <span class="stat" style="color:var(--green)">已激活 <b id="sActive">0</b></span>
+    <span class="stat" style="color:var(--red)">已作废 <b id="sRevoked">0</b></span>
+  </div>
+  <div class="card">
+    <div class="tabs">
+      <button class="active" onclick="showTab('list',this)">验证码列表</button>
+      <button onclick="showTab('logs',this)">校验日志</button>
+    </div>
+    <div id="tab-list"><div id="listWrap"></div></div>
+    <div id="tab-logs" style="display:none"><div id="logsWrap"></div></div>
+  </div>
+  <div class="toast" id="t"></div>
+  </div>
+<script>
+const API='/api';
+let PWD = sessionStorage.getItem('adminPwd') || '';
+async function doLogin(){
+  const v = document.getElementById('pwdInput').value;
+  if(!v){ document.getElementById('loginErr').textContent='请输入密码'; return; }
+  try {
+    const r = await (await fetch(API+'/admin/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pwd:v})})).json();
+    if(r.ok){ PWD=v; sessionStorage.setItem('adminPwd',v); enterMain(); }
+    else { document.getElementById('loginErr').textContent='密码错误'; }
+  } catch(e){ document.getElementById('loginErr').textContent='连接失败'; }
+}
+function enterMain(){ document.getElementById('login').style.display='none'; document.getElementById('main').style.display=''; loadList(); setInterval(loadList,8000); }
+if(PWD){ fetch(API+'/admin/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pwd:PWD})}).then(r=>r.json()).then(r=>{ if(r.ok) enterMain(); else { PWD=''; sessionStorage.removeItem('adminPwd'); } }).catch(()=>{}); }
+function toast(m){const e=document.getElementById('t');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1600)}
+async function post(p,b){return (await fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json','x-admin-pwd':PWD},body:JSON.stringify(b)})).json()}
+async function get(p){return (await fetch(API+p,{headers:{'x-admin-pwd':PWD}})).json()}
+async function gen(){
+  const cnt=parseInt(document.getElementById('cnt').value)||1;
+  const note=document.getElementById('note').value;
+  const r=await post('/admin/generate',{count:cnt,note});
+  if(r.ok){
+    const out=document.getElementById('genOut');
+    out.innerHTML='<div style="margin-bottom:6px;color:var(--muted);font-size:13px">已生成，点击复制：</div>'+r.codes.map(c=>'<div class="row" style="margin-bottom:6px"><code class="code" style="font-size:16px;padding:4px 8px;background:var(--bg);border-radius:6px">'+c+'</code><button class="small ghost" onclick="copy(\\''+c+'\\')">复制</button></div>').join('');
+    document.getElementById('note').value=''; loadList(); toast('已生成 '+r.codes.length+' 个码');
+  } else toast('生成失败');
+}
+function copy(t){navigator.clipboard.writeText(t).then(()=>toast('已复制: '+t))}
+async function loadList(){
+  const r=await get('/admin/list'); if(!r.ok)return;
+  const s={total:r.rows.length,unused:0,active:0,revoked:0}; r.rows.forEach(x=>s[x.status]++);
+  document.getElementById('sTotal').textContent=s.total; document.getElementById('sUnused').textContent=s.unused;
+  document.getElementById('sActive').textContent=s.active; document.getElementById('sRevoked').textContent=s.revoked;
+  const w=document.getElementById('listWrap');
+  if(!r.rows.length){w.innerHTML='<div class="empty">还没有验证码，点上方"生成"创建</div>';return}
+  w.innerHTML='<table><thead><tr><th>验证码</th><th>备注</th><th>绑定设备</th><th>状态</th><th>生成时间</th><th>激活时间</th><th>操作</th></tr></thead><tbody>'+
+    r.rows.map(x=>{
+      const badge='<span class="badge b-'+x.status+'">'+({unused:'未使用',active:'已激活',revoked:'已作废'})[x.status]+'</span>';
+      const dev=x.device_label?('✓ '+x.device_label):(x.status==='unused'?'<span style="color:var(--muted)">—</span>':'未知设备');
+      return '<tr><td><code class="code">'+x.code+'</code> <button class="small ghost" onclick="copy(\\''+x.code+'\\')">复制</button></td><td contenteditable="true" onblur="saveNote(\\''+x.code+'\\',this.textContent)">'+(x.note||'')+'</td><td>'+dev+'</td><td>'+badge+'</td><td>'+fmt(x.created_at)+'</td><td>'+(x.activated_at?fmt(x.activated_at):'<span style="color:var(--muted)">—</span>')+'</td><td>'+(x.status==='revoked'?'':'<button class="small ghost danger" onclick="revoke(\\''+x.code+'\\')">作废</button>')+' <button class="small ghost danger" onclick="del(\\''+x.code+'\\')">删</button></td></tr>';
+    }).join('')+'</tbody></table>';
+}
+async function loadLogs(){
+  const r=await get('/admin/logs'); if(!r.ok)return;
+  const w=document.getElementById('logsWrap');
+  if(!r.rows.length){w.innerHTML='<div class="empty">还没有校验记录</div>';return}
+  w.innerHTML='<table><thead><tr><th>时间</th><th>验证码</th><th>设备</th><th>动作</th><th>结果</th><th>详情</th></tr></thead><tbody>'+
+    r.rows.map(x=>'<tr><td>'+fmt(x.at)+'</td><td><code class="code">'+x.code+'</code></td><td>'+(x.deviceId?x.deviceId.slice(0,8)+'…':'-')+'</td><td>'+x.action+'</td><td>'+(x.ok?'<span style="color:var(--green)">成功</span>':'<span style="color:var(--red)">失败</span>')+'</td><td style="white-space:normal">'+(x.detail||'')+'</td></tr>').join('')+'</tbody></table>';
+}
+function fmt(s){if(!s)return '-';const d=new Date(s);const p=n=>String(n).padStart(2,'0');return (d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())}
+async function revoke(c){if(!confirm('确认作废 '+c+'？作废后该设备再校验会失败。'))return;await post('/admin/revoke',{code:c});toast('已作废');loadList()}
+async function del(c){if(!confirm('确认删除 '+c+'？相关日志一并清除。'))return;await post('/admin/delete',{code:c});toast('已删除');loadList()}
+async function saveNote(c,v){await post('/admin/note',{code:c,note:v});toast('备注已保存')}
+function showTab(t,btn){document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-list').style.display=t==='list'?'':'none';document.getElementById('tab-logs').style.display=t==='logs'?'':'none';if(t==='logs')loadLogs()}
+</script>
+</body>
+</html>

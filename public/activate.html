@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To be done · 下载</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#0a84ff 0%,#0050d0 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+  .card{background:#fff;border-radius:20px;padding:40px 32px;width:100%;max-width:380px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+  .logo{font-size:48px;margin-bottom:8px}
+  h1{font-size:24px;margin-bottom:4px;font-weight:700}
+  .sub{font-size:14px;color:#86868b;margin-bottom:24px}
+  .dl-btn{display:flex;align-items:center;gap:10px;padding:16px;border:1px solid #e2e2e6;border-radius:12px;margin-bottom:10px;text-decoration:none;color:#1d1d1f;font-size:15px;transition:.2s}
+  .dl-btn:hover{border-color:#0a84ff;background:#f5f9ff}
+  .dl-btn .icon{font-size:24px}
+  .dl-btn .info{text-align:left;flex:1}
+  .dl-btn .name{font-weight:600}
+  .dl-btn .size{font-size:12px;color:#86868b}
+  .hint{margin-top:24px;font-size:13px;color:#86868b;line-height:1.8;border-top:1px solid #f0f0f2;padding-top:20px}
+  .step{display:flex;gap:8px;margin-bottom:8px;text-align:left;font-size:13px;color:#555}
+  .step b{color:#0a84ff;flex-shrink:0}
+  .guide{margin-top:20px;border-top:1px solid #f0f0f2;padding-top:20px;text-align:left}
+  .guide summary{cursor:pointer;font-size:14px;font-weight:600;color:#1d1d1f;padding:8px 0}
+  .guide summary:hover{color:#0a84ff}
+  .guide-content{margin-top:12px;display:none}
+  .guide[open] .guide-content{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .g-step{background:#f5f5f7;border-radius:10px;padding:14px;margin-bottom:10px;font-size:13px;color:#555;line-height:1.6}
+  .g-step .g-title{font-weight:600;color:#1d1d1f;margin-bottom:4px}
+  .g-step code{background:#e8f0fe;color:#0a84ff;padding:2px 6px;border-radius:4px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+  .warn{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:12px;color:#7a5c00;margin-bottom:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🐾</div>
+    <h1>To be done</h1>
+    <div class="sub">下载安装后，打开 App 输入验证码激活</div>
+    <a class="dl-btn" href="/downloads/To-be-done-mac.dmg" download>
+      <span class="icon">🍎</span>
+      <span class="info"><div class="name">macOS 安装包</div><div class="size">.dmg · 约 6.4 MB</div></span>
+      <span>↓</span>
+    </a>
+    <a class="dl-btn" href="/downloads/To-be-done-mac.zip" download>
+      <span class="icon">📦</span>
+      <span class="info"><div class="name">macOS 压缩包</div><div class="size">.zip · 约 5.9 MB</div></span>
+      <span>↓</span>
+    </a>
+    <a class="dl-btn" href="#" style="opacity:.4" onclick="return alertWin()">
+      <span class="icon">🪟</span>
+      <span class="info"><div class="name">Windows 安装包</div><div class="size">.exe · 即将上线</div></span>
+      <span>↓</span>
+    </a>
+    <div class="hint">
+      <div class="step"><b>①</b>下载 .dmg 安装包</div>
+      <div class="step"><b>②</b>双击打开 → 把 App 拖到「应用程序」</div>
+      <div class="step"><b>③</b>在「应用程序」里<b>右键点 App</b> → 选「打开」→ 再点「打开」</div>
+      <div class="step"><b>④</b>弹验证码框 → 输入验证码激活（一机一码）</div>
+    </div>
+    <details class="guide">
+      <summary>🍎 打不开？看这里（3 步搞定）</summary>
+      <div class="guide-content">
+        <div class="warn">⚠️ macOS 会拦截未签名 App，显示「移到废纸篓」是正常的，不是 App 有问题。按下面 3 步操作即可。</div>
+        <div class="g-step">
+          <div class="g-title">第 1 步 · 安装</div>
+          下载 <code>.dmg</code> 文件 → 双击打开 → 把 <b>To be done</b> 拖到「应用程序」文件夹
+        </div>
+        <div class="g-step">
+          <div class="g-title">第 2 步 · 右键打开（关键！）</div>
+          打开「应用程序」→ 找到 <b>To be done</b><br>
+          <b>按住 Control 键点击 App 图标</b>（或用两根手指点触控板）→ 选「打开」<br>
+          <span style="color:#ff9500">⚠️ 不能直接双击！双击会被拦</span>
+        </div>
+        <div class="g-step">
+          <div class="g-title">第 3 步 · 点「打开」确认</div>
+          弹出提示框 → 点「打开」→ <span style="color:#34c759">✅ 搞定！</span><br>
+          <span style="color:#86868b">以后双击就能打开，只需操作一次</span>
+        </div>
+        <div class="g-step">
+          <div class="g-title">还是不行？最后一招</div>
+          打开「终端」App（在启动台搜「终端」），复制下面这行粘贴进去，回车，输入 Mac 密码：<br>
+          <code style="display:inline-block;margin-top:6px;padding:8px 12px;background:#1d1d1f;color:#30d158;border-radius:6px;font-size:12px;word-break:break-all">xattr -cr "/Applications/To be done.app" && open "/Applications/To be done.app"</code>
+        </div>
+      </div>
+    </details>
+  </div>
+<script>
+function alertWin(){alert('Windows 版正在打包中，敬请期待！');return false}
+</script>
+</body>
+</html>
